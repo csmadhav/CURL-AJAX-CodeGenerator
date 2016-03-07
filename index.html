@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Parse</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<style>
+	#url {
+		width:300px;
+	}
+
+	</style>
+
+	
+</head>
+<body>
+	<header><center><h2>Intelligent Code Generator</h2></center></header>
+
+	<center>
+	
+	Enter the URL to get details and generate PHP cURL code or JS AJAX code:<br/><input id="url" type="text"/><br/>
+	Enter method type <select id="method"><option value="GET">GET</option><option value="POST">POST</option>
+</select>
+<input type="radio" name="lang" value="PHP" checked>PHP cURL</input>
+
+<input type="radio" name="lang" value="AJAX">AJAX</input>
+
+<br/><br/>
+Data Body In JSON:<br/><br/><textarea rows="5" cols="20" id="data" type="text">{
+	
+}</textarea>
+
+<br/><button onclick="generateCode();">GO!</button><br/><br/>
+<textarea id="type" rows="20" cols="70">
+	YOUR RESPONSE DETAILS HERE!
+	</textarea>
+
+<textarea id="phpCode" rows="20" cols="70">
+	YOUR PHP CODE HERE!
+	</textarea>
+</center> 
+
+
+
+	<script type="text/javascript">
+	var textFile=null;
+	function generateCode()
+	{
+		url=document.getElementById("url").value;
+		data=document.getElementById("data").value;
+		lang=document.querySelector('input[name="lang"]:checked').value;
+		try {
+			var json=JSON.parse(data);
+		}
+		catch(err)
+		{
+			alert("Please Enter a valid JSON");
+			return;
+
+		}
+		method=document.getElementById("method").value;
+		
+		data=data.replace(/'/g,'"'); 
+		
+		
+
+		$.ajax({
+			url:"getUrlDetails.php",
+			method:"POST",
+			data:{url:url,method:method,data:data},
+			success:function(response)
+			{
+				$("#type").text(response);
+				if(response.indexOf("Curl error:")>=0)
+				{
+					$("#phpCode").html("Please Check your details");
+					return;
+
+
+				}
+				if(lang=="PHP")
+				{
+				if(method=="GET")
+				{
+					try
+					{
+					url=url+"?"+$.param(JSON.parse(data));
+					}
+					catch(e)
+					{
+
+					}
+
+					$("#phpCode").html("$url='"+url+"';\n"+
+						"$ch=curl_init();\n"+
+						"curl_setopt($ch,CURLOPT_URL,$url);\n"+
+						"curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);\n"+
+						"curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);\n"+
+						"$response=curl_exec($ch);\n"
+						);
+				}
+				else
+				{
+					$("#phpCode").html("$url='"+url+"';\n"+
+						"$data='"+data+"';\n"+
+						"if($data!='')\n"+
+						"$dataJson=json_decode($data,true);\n"+
+						"else\n"+
+						"$dataJson=array();\n"+
+						
+						"if($dataJson)\n"+
+						"{	\n"+
+						"	$postFields=http_build_query($dataJson);\n"+
+						"}\n"+
+						"else\n"+
+						"	$postFields='';\n"+
+						"$ch=curl_init();\n"+
+						"curl_setopt($ch,CURLOPT_URL,$url);\n"+
+						"curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);\n"+
+						"curl_setopt($ch, CURLOPT_POST, 1);\n"+
+						"curl_setopt($ch, CURLOPT_POSTFIELDS,$postFields);\n"+
+						"curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);\n"+
+						"$response=curl_exec($ch);\n"
+						);
+
+				}
+				/*
+				CHECK FOR Content-Type: application/json
+				Content-Type: application/xml
+				*/
+				if(response.indexOf("Content-Type: application/json")>=0)
+				{
+					$("#phpCode").append("$parsedJson=json_decode($response)//<-CONVERTING JSON TO ARRAY");
+
+				}
+				if(response.indexOf("Content-Type: application/xml")>=0)
+				{
+					$("#phpCode").append("$parsedXML=simplexml_load_string($response)//<-CONVERTING XML TO simpleXMLelement object");
+
+				}
+				}
+				else
+				{
+					$("#phpCode").html("CURRENTLY PHP IS SUPPORTED");
+
+				}
+
+
+
+			}
+			}
+
+			);
+
+	}
+	function makeTextFile(text)
+	{
+		var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+		var data=new Blob([text],{type:'octet/stream'});
+		url = window.URL.createObjectURL(data);
+        a.href = url;
+        a.download = "text.php";
+        a.click();
+        window.URL.revokeObjectURL(url);
+		
+	}
+	
+
+	</script>
+</body>
+</html>
