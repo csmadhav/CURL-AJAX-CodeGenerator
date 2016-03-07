@@ -1,7 +1,8 @@
 # CURL-AJAX-CodeGenerator
 Visit www.csmadhav.esy.es to see this live.<br/>
 <hr>
-This is a quick tool which can generate PHP cURL / AJAX code for getting reponse of an API.<br/>
+This is a quick tool which can generate PHP cURL / AJAX code for getting reponse of an API. This tool is useful when you have to save time writing cURL/ AJAX code again and again. <br/>
+
 Follow these steps<br/>
 
 1.Enter the URL of API<br/>
