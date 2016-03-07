@@ -13,7 +13,7 @@
 	
 </head>
 <body>
-	<header><center><h2>Intelligent Code Generator</h2></center></header>
+	<header><center><h2>Code Generator</h2></center></header>
 
 	<center>
 	
@@ -35,7 +35,7 @@ Data Body In JSON:<br/><br/><textarea rows="5" cols="20" id="data" type="text">{
 	</textarea>
 
 <textarea id="phpCode" rows="20" cols="70">
-	YOUR PHP CODE HERE!
+	YOUR PHP/AJAX CODE HERE!
 	</textarea>
 </center> 
 
@@ -140,7 +140,26 @@ Data Body In JSON:<br/><br/><textarea rows="5" cols="20" id="data" type="text">{
 				}
 				else
 				{
-					$("#phpCode").html("CURRENTLY PHP IS SUPPORTED");
+					//$("#phpCode").html("CURRENTLY PHP IS SUPPORTED");
+					var djson=JSON.parse(data);
+					$("#phpCode").html("$.ajax({\n"+
+										"url:'"+url+"',\n"+
+										"method:'"+method+"',\n"+
+										"data:"+JSON.stringify(djson)+",\n"+
+										"success:function(data){//proceed here\n");
+				if(response.indexOf("Content-Type: application/json")>=0)
+				{
+					$("#phpCode").append("var parsedJson=JSON.parse(data)//<-CONVERTING JSON TO JS Object");
+
+				}
+				// TO DO: XML parsing
+				$("#phpCode").append("\n},\n"+
+										"error:function(e){//proceed here too\n"+
+										"}\n"+
+										"});");
+
+
+										
 
 				}
 
